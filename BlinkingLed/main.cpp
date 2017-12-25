@@ -30,18 +30,18 @@
 #define OE_low()  	HC595_PORT &= ~(1 << OE_PIN)
 #define OE_high() 	HC595_PORT |=  (1 << OE_PIN)
 
-#define DELAY		50
+#define DELAY		500
 
 // Number of bytes needed to store output pin.
 // Example: 16 (led)pins needed? Take two bytes = 2 x 8 = 16 bits
-#define PIN_BYTES	4
+#define PIN_BYTES	2
 
-volatile unsigned char ledPins[PIN_BYTES];
+volatile unsigned char ledPins[PIN_BYTES]; // array of size PIN_BYTES, each index contains 1 byte/8 bits
 
 //Define functions
 //===============================================
 void ioinit(void);
-void output_led_state(unsigned int __led_state);
+void output_led_state(unsigned short __led_state);
 void setLedPins(unsigned char ledBytes[PIN_BYTES]);
 void knightRider(unsigned char loops);
 //===============================================
@@ -69,7 +69,7 @@ void ioinit (void)
     PORTC |= (0 << DS_PIN) | (0 << SH_CP_PIN) | (0 << ST_CP_PIN) | (0 << OE_PIN) | (1 << MR_PIN);
 }
 
-void output_led_state(unsigned int __led_state)
+void output_led_state(unsigned short __led_state)
 {
    SH_CP_low();
    ST_CP_low();
