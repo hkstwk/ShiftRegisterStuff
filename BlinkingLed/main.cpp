@@ -34,7 +34,7 @@
 
 // Number of bytes needed to store output pin.
 // Example: 16 (led)pins needed? Take two bytes = 2 x 8 = 16 bits
-#define PIN_BYTES	2
+#define PIN_BYTES	4
 
 volatile unsigned char ledPins[PIN_BYTES];
 
@@ -73,7 +73,7 @@ void output_led_state(unsigned int __led_state)
 {
    SH_CP_low();
    ST_CP_low();
-   for (int i=0;i<16;i++)
+   for (int i=15;i>=0;i--)
    {
       if ((_BV(i) & __led_state) == _BV(i))  //bit_is_set doesn’t work on unsigned int so we do this instead
          DS_high();
