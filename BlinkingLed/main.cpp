@@ -41,7 +41,7 @@ volatile unsigned char ledPins[PIN_BYTES];
 //Define functions
 //===============================================
 void ioinit(void);
-void output_led_state(unsigned int __led_state);
+void output_led_state(unsigned short __led_state);
 void setLedPins(unsigned char ledBytes[PIN_BYTES]);
 void knightRider(unsigned char loops);
 //===============================================
@@ -69,11 +69,11 @@ void ioinit (void)
     PORTC |= (0 << DS_PIN) | (0 << SH_CP_PIN) | (0 << ST_CP_PIN) | (0 << OE_PIN) | (1 << MR_PIN);
 }
 
-void output_led_state(unsigned int __led_state)
+void output_led_state(unsigned short __led_state)
 {
    SH_CP_low();
    ST_CP_low();
-   for (int i=0;i<16;i++)
+   for (int i=16;i>0;i--)
    {
       if ((_BV(i) & __led_state) == _BV(i))  //bit_is_set doesn’t work on unsigned int so we do this instead
          DS_high();
