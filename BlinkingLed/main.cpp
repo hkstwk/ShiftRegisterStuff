@@ -33,7 +33,6 @@
 #define DELAY		50
 #define DELAY_LOOP	1000 // Delay between two animations
 
-
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
 volatile uint16_t ledPins;
 
@@ -172,12 +171,11 @@ void knightRider(unsigned char loops){
 		   output_led_state(_BV(i) ^ 0b1111111111111111);
 		   _delay_ms(DELAY);
 		}
-		for (int i=1;i<15;i++)
+		for (int i=1;i<=15;i++)
 		{
 		   output_led_state(_BV(i) ^ 0b1111111111111111);
 		   _delay_ms(DELAY);
 		}
 		loops--;
 	}
-	output_led_state(_BV(15) ^ 0b1111000011110000);
 }
