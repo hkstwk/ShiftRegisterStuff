@@ -44,6 +44,7 @@ void setLedPins(uint16_t ledRegister);
 void knightRider(unsigned char loops);
 void knightRider2(unsigned char loops);
 void knightRider3(unsigned char loops);
+void initTimer1();
 //===============================================
 
 int main (void)
@@ -178,4 +179,10 @@ void knightRider(unsigned char loops){
 		}
 		loops--;
 	}
+}
+
+void initTimer(){
+	/* TODO initialize timer, clear on compare, enable interrupt handler,
+	 * so that setLedPins function can move to this interrupt handler.
+	 */
 }
