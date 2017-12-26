@@ -1,6 +1,14 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
+// Timer related
+// Prescaler means timer counter is updated ever ### ticks, where ### is prescale number
+#define PRESCALER1		 (1 << CS10)
+#define PRESCALER8		 (1 << CS11)
+#define PRESCALER64		((1 << CS10) | (1 << CS11))
+#define PRESCALER256		 (1 << CS12)
+#define PRESCALER1024	((1 << CS10) | (1 << CS12))
 
 // Port and pin definitions for 74HC595 Shift Register
 #define HC595_PORT	PORTC	// Define port for 74HC595 Shift Register
@@ -50,25 +58,33 @@ void initTimer1();
 int main (void)
 {
    ioinit(); //Setup IO pins and defaults
+   initTimer1();
 
    while(1)
    {
+	   for (uint16_t i=0; i< 8191; i++){
+		   ledPins = i;
+		   _delay_us(1000);
+	   }
+	   ledPins = 0;
+	   _delay_ms(1000);
+
 	   knightRider3(3);
 	   _delay_ms(DELAY_LOOP);
-	   knightRider2(3);
-	   _delay_ms(DELAY_LOOP);
-	   setLedPins(0xffff);
-	   _delay_ms(DELAY_LOOP);
-	   setLedPins(0x0000);
-	   _delay_ms(DELAY_LOOP);
-	   setLedPins(0xffff ^ 0b0101010101010101);
-	   _delay_ms(DELAY_LOOP);
-	   setLedPins(0xffff ^ 0b0000000011111111);
-	   _delay_ms(DELAY_LOOP);
-	   setLedPins(0xffff ^ 0b1111111100000000);
-	   _delay_ms(DELAY_LOOP);
-	   knightRider(1);
-	   _delay_ms(4*DELAY_LOOP);
+//	   knightRider2(3);
+//	   _delay_ms(DELAY_LOOP);
+//	   setLedPins(0xffff);
+//	   _delay_ms(DELAY_LOOP);
+//	   setLedPins(0x0000);
+//	   _delay_ms(DELAY_LOOP);
+//	   setLedPins(0xffff ^ 0b0101010101010101);
+//	   _delay_ms(DELAY_LOOP);
+//	   setLedPins(0xffff ^ 0b0000000011111111);
+//	   _delay_ms(DELAY_LOOP);
+//	   setLedPins(0xffff ^ 0b1111111100000000);
+//	   _delay_ms(DELAY_LOOP);
+//	   knightRider(1);
+//	   _delay_ms(4*DELAY_LOOP);
    }
 
    return 0;
@@ -130,13 +146,13 @@ void knightRider3(unsigned char loops){
 		for (int i=15;i>=0;i--)
 		{
 		   ledPins |= (_BV(i));
-		   setLedPins(ledPins);
+//		   setLedPins(ledPins);
 		   _delay_ms(DELAY);
 		}
 		for (int i=0;i<=15;i++)
 		{
 		   ledPins &= ~(_BV(i));
-		   setLedPins(ledPins);
+//		   setLedPins(ledPins);
 		   _delay_ms(DELAY);
 		}
 		loops--;
@@ -181,8 +197,32 @@ void knightRider(unsigned char loops){
 	}
 }
 
-void initTimer(){
-	/* TODO initialize timer, clear on compare, enable interrupt handler,
-	 * so that setLedPins function can move to this interrupt handler.
-	 */
+void initTimer1(){
+	/* Initialize timer1. On compare match the interrupt will be triggered to fill the Shift Register
+	 * with the contents of ledPins, and latch the signals to output.
+	 * */
+	TCCR1B |= (1 << WGM12); 		// Clear Timer on Compare Match (CTC) mode
+	TCCR1B |= PRESCALER64; 		// Counter is updated every 64 ticks. At 16Mhz that is 250.000 updates/second
+	TIMSK1 |= (1 << OCIE1A); 	// Enable interrupt on output compare A match
+	OCR1A   = 192;				// Refresh rate = (16MHz / 64) / 192 = 1300 Hz = call to interrupt vector
+	sei();
+}
+
+
+ISR(TIMER1_COMPA_vect){
+   SH_CP_low();
+   ST_CP_low();
+   for (uint16_t i=0; i<16; i++)
+   {
+	   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
+	   if ((ledPins & (uint16_t)(1 << i)) == (uint16_t)(1 << i))
+		 DS_high();
+	  else
+		 DS_low();
+
+
+	  SH_CP_high();
+	  SH_CP_low();
+   }
+   ST_CP_high();
 }
