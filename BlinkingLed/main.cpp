@@ -31,6 +31,8 @@
 #define OE_high() 	HC595_PORT |=  (1 << OE_PIN)
 
 #define DELAY		50
+#define DELAY_LOOP	1000 // Delay between two animations
+
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
 volatile uint16_t ledPins;
@@ -49,8 +51,18 @@ int main (void)
 
    while(1)
    {
-	   knightRider(5);
-	   _delay_ms(2000);
+	   setLedPins(0xffff);
+	   _delay_ms(DELAY_LOOP);
+	   setLedPins(0x0000);
+	   _delay_ms(DELAY_LOOP);
+	   setLedPins(0xffff ^ 0b0101010101010101);
+	   _delay_ms(DELAY_LOOP);
+	   setLedPins(0xffff ^ 0b0000000011111111);
+	   _delay_ms(DELAY_LOOP);
+	   setLedPins(0xffff ^ 0b1111111100000000);
+	   _delay_ms(DELAY_LOOP);
+	   knightRider(1);
+	   _delay_ms(DELAY_LOOP);
    }
 
    return 0;
