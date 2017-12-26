@@ -44,6 +44,7 @@ void output_led_state(uint16_t __led_state);
 void setLedPins(uint16_t ledRegister);
 void knightRider(unsigned char loops);
 void knightRider2(unsigned char loops);
+void knightRider3(unsigned char loops);
 //===============================================
 
 int main (void)
@@ -52,7 +53,9 @@ int main (void)
 
    while(1)
    {
-	   knightRider2(1);
+	   knightRider3(3);
+	   _delay_ms(DELAY_LOOP);
+	   knightRider2(3);
 	   _delay_ms(DELAY_LOOP);
 	   setLedPins(0xffff);
 	   _delay_ms(DELAY_LOOP);
@@ -120,6 +123,26 @@ void setLedPins(uint16_t ledRegister)
    ST_CP_high();
 }
 
+void knightRider3(unsigned char loops){
+	if (loops == 0)
+		loops = 1;
+//	while (loops > 0){
+		for (int i=15;i>=0;i--)
+		{
+		   ledPins |= (_BV(i));
+		   setLedPins(ledPins);
+		   _delay_ms(DELAY);
+		}
+		for (int i=0;i<=15;i++)
+		{
+		   ledPins &= ~(_BV(i));
+		   setLedPins(ledPins);
+		   _delay_ms(DELAY);
+		}
+		loops--;
+//	}
+}
+
 void knightRider2(unsigned char loops){
 	if (loops == 0)
 		loops = 1;
@@ -130,7 +153,7 @@ void knightRider2(unsigned char loops){
 		   setLedPins(ledPins);
 		   _delay_ms(DELAY);
 		}
-		for (int i=1;i<15;i++)
+		for (int i=0;i<=15;i++)
 		{
 		   ledPins = (_BV(i));
 		   setLedPins(ledPins);
