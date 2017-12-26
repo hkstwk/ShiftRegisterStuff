@@ -30,19 +30,16 @@
 #define OE_low()  	HC595_PORT &= ~(1 << OE_PIN)
 #define OE_high() 	HC595_PORT |=  (1 << OE_PIN)
 
-#define DELAY		500
+#define DELAY		50
 
-// Number of bytes needed to store output pin.
-// Example: 16 (led)pins needed? Take two bytes = 2 x 8 = 16 bits
-#define PIN_BYTES	2
-
-volatile unsigned char ledPins[PIN_BYTES]; // array of size PIN_BYTES, each index contains 1 byte/8 bits
+// 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
+volatile uint16_t ledPins;
 
 //Define functions
 //===============================================
 void ioinit(void);
-void output_led_state(unsigned short __led_state);
-void setLedPins(unsigned char ledBytes[PIN_BYTES]);
+void output_led_state(uint16_t __led_state);
+void setLedPins(uint16_t ledRegister);
 void knightRider(unsigned char loops);
 //===============================================
 
@@ -52,8 +49,6 @@ int main (void)
 
    while(1)
    {
-	   knightRider(0);
-	   _delay_ms(2000);
 	   knightRider(5);
 	   _delay_ms(2000);
    }
@@ -69,7 +64,7 @@ void ioinit (void)
     PORTC |= (0 << DS_PIN) | (0 << SH_CP_PIN) | (0 << ST_CP_PIN) | (0 << OE_PIN) | (1 << MR_PIN);
 }
 
-void output_led_state(unsigned short __led_state)
+void output_led_state(uint16_t __led_state)
 {
    SH_CP_low();
    ST_CP_low();
@@ -91,24 +86,23 @@ void output_led_state(unsigned short __led_state)
  * To save memory the bits are stored in a two byte unsigned integer.
  * Setting the leds on or off is just a matter of iterating all bits
  */
-void setLedPins(unsigned char ledBytes[PIN_BYTES])
+void setLedPins(uint16_t ledRegister)
 {
    SH_CP_low();
    ST_CP_low();
-   for (int byteCount=0; byteCount < PIN_BYTES; byteCount++){
-	   for (int i=0; i<8; i++)
-	   {
-		   if ((ledBytes[byteCount] & (1 << i)) == (1 << i))
-			 DS_high();
-		  else
-			 DS_low();
+   for (uint16_t i=0; i<16; i++)
+   {
+	   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
+	   if ((ledRegister & (uint16_t)(1 << i)) == (uint16_t)(1 << i))
+		 DS_high();
+	  else
+		 DS_low();
 
 
-		  SH_CP_high();
-		  SH_CP_low();
-	   }
-	   ST_CP_high();
+	  SH_CP_high();
+	  SH_CP_low();
    }
+   ST_CP_high();
 }
 
 void knightRider(unsigned char loops){
