@@ -42,6 +42,7 @@
 #define DELAY_LOOP	1000 // Delay between two animations
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
+#define  INT_BITS	16
 volatile uint16_t ledPins;
 
 //Define functions
@@ -51,7 +52,8 @@ void knightRider1(unsigned char loops);
 void knightRider2(unsigned char loops);
 void knightRider3(unsigned char loops);
 void snake(unsigned char loops);
-void rotateLeft(unsigned char loops, uint16_t bitPattern);
+void leftRotate(unsigned char loops, uint16_t bitPattern);
+void rightRotate(unsigned char loops, uint16_t bitPattern);
 void initTimer1();
 //===============================================
 
@@ -62,8 +64,10 @@ int main (void)
 
    while(1)
    {
-//	   rotateLeft(1, 0b1100000000000000);
-//	   _delay_ms(DELAY_LOOP);
+	   leftRotate(128, 0b0000001111111100);
+	   _delay_ms(DELAY_LOOP);
+	   rightRotate(128, 0b0000001111111100);
+	   _delay_ms(DELAY_LOOP);
 	   snake(2);
 	   _delay_ms(DELAY_LOOP);
 	   for (uint16_t i=0; i< 2047; i++){
@@ -184,27 +188,28 @@ void snake(unsigned char loops){
 	}
 }
 
-void rotateLeft(unsigned char loops, uint16_t bitPattern){
-	int i;
-	uint16_t leftPart, rightPart;
-	if (loops == 0)
-		loops = 1;
-	while (loops > 0){
-		ledPins = bitPattern;
-		_delay_ms(10000);
-		for (i=0;i<64;i++)
-		{
-			if ((ledPins & (uint16_t)(1 << 15)) == (uint16_t)(1 << 15)){
-				leftPart = (bitPattern << 1);
-				rightPart = (bitPattern >> 15);
-				ledPins = leftPart | rightPart;
-			}
-			else {
-				ledPins <<= 1;
-			}
-			_delay_ms(10*DELAY);
-		}
+uint16_t ROL(uint16_t bitPattern, unsigned char digits){
+	return (bitPattern << digits) | bitPattern >> (INT_BITS - digits);
+}
 
+uint16_t ROR(uint16_t bitPattern, unsigned char digits){
+	return (bitPattern >> digits) | bitPattern << (INT_BITS - digits);
+}
+
+void leftRotate(unsigned char loops, uint16_t bitPattern){
+	ledPins = bitPattern;
+	while (loops > 0){
+		ledPins = ROL(ledPins, 1);
+		_delay_ms(DELAY);
+		loops--;
+	}
+}
+
+void rightRotate(unsigned char loops, uint16_t bitPattern){
+	ledPins = bitPattern;
+	while (loops > 0){
+		ledPins = ROR(ledPins, 1);
+		_delay_ms(DELAY);
 		loops--;
 	}
 }
