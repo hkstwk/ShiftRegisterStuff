@@ -47,9 +47,7 @@ volatile uint16_t ledPins;
 //Define functions
 //===============================================
 void ioinit(void);
-void output_led_state(uint16_t __led_state);
-void setLedPins(uint16_t ledRegister);
-void knightRider(unsigned char loops);
+void knightRider1(unsigned char loops);
 void knightRider2(unsigned char loops);
 void knightRider3(unsigned char loops);
 void initTimer1();
@@ -62,29 +60,28 @@ int main (void)
 
    while(1)
    {
-	   for (uint16_t i=0; i< 8191; i++){
+	   for (uint16_t i=0; i< 2047; i++){
 		   ledPins = i;
 		   _delay_us(1000);
 	   }
 	   ledPins = 0;
-	   _delay_ms(1000);
-
+	   _delay_ms(DELAY_LOOP);
 	   knightRider3(3);
 	   _delay_ms(DELAY_LOOP);
-//	   knightRider2(3);
-//	   _delay_ms(DELAY_LOOP);
-//	   setLedPins(0xffff);
-//	   _delay_ms(DELAY_LOOP);
-//	   setLedPins(0x0000);
-//	   _delay_ms(DELAY_LOOP);
-//	   setLedPins(0xffff ^ 0b0101010101010101);
-//	   _delay_ms(DELAY_LOOP);
-//	   setLedPins(0xffff ^ 0b0000000011111111);
-//	   _delay_ms(DELAY_LOOP);
-//	   setLedPins(0xffff ^ 0b1111111100000000);
-//	   _delay_ms(DELAY_LOOP);
-//	   knightRider(1);
-//	   _delay_ms(4*DELAY_LOOP);
+	   knightRider2(3);
+	   _delay_ms(DELAY_LOOP);
+	   ledPins = (0xffff);
+	   _delay_ms(DELAY_LOOP);
+	   ledPins = (0x0000);
+	   _delay_ms(DELAY_LOOP);
+	   ledPins = (0xffff ^ 0b0101010101010101);
+	   _delay_ms(DELAY_LOOP);
+	   ledPins = (0xffff ^ 0b0000000011111111);
+	   _delay_ms(DELAY_LOOP);
+	   ledPins = (0xffff ^ 0b1111111100000000);
+	   _delay_ms(DELAY_LOOP);
+	   knightRider1(3);
+	   _delay_ms(DELAY_LOOP);
    }
 
    return 0;
@@ -98,109 +95,64 @@ void ioinit (void)
     PORTC |= (0 << DS_PIN) | (0 << SH_CP_PIN) | (0 << ST_CP_PIN) | (0 << OE_PIN) | (1 << MR_PIN);
 }
 
-void output_led_state(uint16_t __led_state)
-{
-   SH_CP_low();
-   ST_CP_low();
-   for (int i=15;i>=0;i--)
-   {
-      if ((_BV(i) & __led_state) == _BV(i))  //bit_is_set doesn’t work on unsigned int so we do this instead
-         DS_high();
-      else
-         DS_low();
-
-
-      SH_CP_high();
-      SH_CP_low();
-   }
-   ST_CP_high();
-}
-
-/* This function sets 16 leds on or off. Depending on the value of the bit that represents the led.
- * To save memory the bits are stored in a two byte unsigned integer.
- * Setting the leds on or off is just a matter of iterating all bits
- */
-void setLedPins(uint16_t ledRegister)
-{
-   SH_CP_low();
-   ST_CP_low();
-   for (uint16_t i=0; i<16; i++)
-   {
-	   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
-	   if ((ledRegister & (uint16_t)(1 << i)) == (uint16_t)(1 << i))
-		 DS_high();
-	  else
-		 DS_low();
-
-
-	  SH_CP_high();
-	  SH_CP_low();
-   }
-   ST_CP_high();
-}
-
 void knightRider3(unsigned char loops){
-	if (loops == 0)
-		loops = 1;
-//	while (loops > 0){
-		for (int i=15;i>=0;i--)
-		{
-		   ledPins |= (_BV(i));
-//		   setLedPins(ledPins);
-		   _delay_ms(DELAY);
-		}
-		for (int i=0;i<=15;i++)
-		{
-		   ledPins &= ~(_BV(i));
-//		   setLedPins(ledPins);
-		   _delay_ms(DELAY);
-		}
-		loops--;
-//	}
-}
-
-void knightRider2(unsigned char loops){
-	if (loops == 0)
-		loops = 1;
-//	while (loops > 0){
-		for (int i=15;i>=0;i--)
-		{
-		   ledPins = (_BV(i));
-		   setLedPins(ledPins);
-		   _delay_ms(DELAY);
-		}
-		for (int i=0;i<=15;i++)
-		{
-		   ledPins = (_BV(i));
-		   setLedPins(ledPins);
-		   _delay_ms(DELAY);
-		}
-		loops--;
-//	}
-}
-
-void knightRider(unsigned char loops){
 	if (loops == 0)
 		loops = 1;
 	while (loops > 0){
 		for (int i=15;i>=0;i--)
 		{
-		   output_led_state(_BV(i) ^ 0b1111111111111111);
+		   ledPins |= (_BV(i));
 		   _delay_ms(DELAY);
 		}
-		for (int i=1;i<=15;i++)
+		for (int i=0;i<=15;i++)
 		{
-		   output_led_state(_BV(i) ^ 0b1111111111111111);
+		   ledPins &= ~(_BV(i));
 		   _delay_ms(DELAY);
 		}
 		loops--;
 	}
 }
 
+void knightRider2(unsigned char loops){
+	if (loops == 0)
+		loops = 1;
+	while (loops > 0){
+		for (int i=15;i>=0;i--)
+		{
+		   ledPins = (_BV(i));
+		   _delay_ms(DELAY);
+		}
+		for (int i=0;i<=15;i++)
+		{
+		   ledPins = (_BV(i));
+		   _delay_ms(DELAY);
+		}
+		loops--;
+	}
+}
+
+void knightRider1(unsigned char loops){
+	if (loops == 0)
+		loops = 1;
+	while (loops > 0){
+		for (int i=15;i>=0;i--)
+		{
+		   ledPins = (_BV(i) ^ 0b1111111111111111);
+		   _delay_ms(DELAY);
+		}
+		for (int i=1;i<=15;i++)
+		{
+		   ledPins = (_BV(i) ^ 0b1111111111111111);
+		   _delay_ms(DELAY);
+		}
+		loops--;
+	}
+}
+
+/* Initialize timer1. On compare match the interrupt will be triggered to fill the Shift Register
+ * with the contents of ledPins, and latch the signals to output.
+ */
 void initTimer1(){
-	/* Initialize timer1. On compare match the interrupt will be triggered to fill the Shift Register
-	 * with the contents of ledPins, and latch the signals to output.
-	 * */
 	TCCR1B |= (1 << WGM12); 		// Clear Timer on Compare Match (CTC) mode
 	TCCR1B |= PRESCALER64; 		// Counter is updated every 64 ticks. At 16Mhz that is 250.000 updates/second
 	TIMSK1 |= (1 << OCIE1A); 	// Enable interrupt on output compare A match
@@ -208,21 +160,27 @@ void initTimer1(){
 	sei();
 }
 
-
+/* This interrupt sets 16 leds on or off. Depending on the value of the bit that represents the led.
+ * To save memory the bits are stored in a two byte unsigned integer (uint16_t).
+ * Setting the leds on or off is just a matter of iterating all 16 bits and push them in shift register
+ */
 ISR(TIMER1_COMPA_vect){
    SH_CP_low();
    ST_CP_low();
    for (uint16_t i=0; i<16; i++)
    {
 	   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
+	   // If position i of ledPins contains a 1, set Data Serial to 1. Else set Data Serial to 0.
 	   if ((ledPins & (uint16_t)(1 << i)) == (uint16_t)(1 << i))
 		 DS_high();
 	  else
 		 DS_low();
 
-
+	   // clock the value of Data Serial into the shift register
 	  SH_CP_high();
 	  SH_CP_low();
    }
+
+   // latch the shift registers to output. All 16 bits are handled in one cycle.
    ST_CP_high();
 }
