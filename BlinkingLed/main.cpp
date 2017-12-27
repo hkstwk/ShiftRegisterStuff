@@ -50,6 +50,7 @@ void ioinit(void);
 void knightRider1(unsigned char loops);
 void knightRider2(unsigned char loops);
 void knightRider3(unsigned char loops);
+void snake(unsigned char loops);
 void initTimer1();
 //===============================================
 
@@ -60,6 +61,8 @@ int main (void)
 
    while(1)
    {
+	   snake(2);
+	   _delay_ms(DELAY_LOOP);
 	   for (uint16_t i=0; i< 2047; i++){
 		   ledPins = i;
 		   _delay_us(1000);
@@ -148,6 +151,36 @@ void knightRider1(unsigned char loops){
 		loops--;
 	}
 }
+
+void snake(unsigned char loops){
+	int i;
+	if (loops == 0)
+		loops = 1;
+	while (loops > 0){
+		for (i=15;i>=0;i--)
+		{
+		   ledPins |= (_BV(i));
+		   _delay_ms(DELAY);
+		}
+		for (i=15;i>=0;i--)
+		{
+		   ledPins &= ~(_BV(i));
+		   _delay_ms(DELAY);
+		}
+		for (i=0;i<=15;i++)
+		{
+		   ledPins |= (_BV(i));
+		   _delay_ms(DELAY);
+		}
+		for (i=0;i<=15;i++)
+		{
+		   ledPins &= ~(_BV(i));
+		   _delay_ms(DELAY);
+		}
+		loops--;
+	}
+}
+
 
 /* Initialize timer1. On compare match the interrupt will be triggered to fill the Shift Register
  * with the contents of ledPins, and latch the signals to output.
