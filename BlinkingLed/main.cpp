@@ -7,7 +7,7 @@
 #include "defines.h"
 #include "init.h"
 
-#include "kitt.h"
+#include "animations/kitt.h"
 #include "animations/rotation.h"
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job

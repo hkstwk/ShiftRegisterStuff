@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
-#include "defines.h"
+#include "../defines.h"
 
 extern volatile uint16_t ledPins;
 
