@@ -51,6 +51,7 @@ void knightRider1(unsigned char loops);
 void knightRider2(unsigned char loops);
 void knightRider3(unsigned char loops);
 void snake(unsigned char loops);
+void rotateLeft(unsigned char loops, uint16_t bitPattern);
 void initTimer1();
 //===============================================
 
@@ -61,6 +62,8 @@ int main (void)
 
    while(1)
    {
+//	   rotateLeft(1, 0b1100000000000000);
+//	   _delay_ms(DELAY_LOOP);
 	   snake(2);
 	   _delay_ms(DELAY_LOOP);
 	   for (uint16_t i=0; i< 2047; i++){
@@ -181,6 +184,30 @@ void snake(unsigned char loops){
 	}
 }
 
+void rotateLeft(unsigned char loops, uint16_t bitPattern){
+	int i;
+	uint16_t leftPart, rightPart;
+	if (loops == 0)
+		loops = 1;
+	while (loops > 0){
+		ledPins = bitPattern;
+		_delay_ms(10000);
+		for (i=0;i<64;i++)
+		{
+			if ((ledPins & (uint16_t)(1 << 15)) == (uint16_t)(1 << 15)){
+				leftPart = (bitPattern << 1);
+				rightPart = (bitPattern >> 15);
+				ledPins = leftPart | rightPart;
+			}
+			else {
+				ledPins <<= 1;
+			}
+			_delay_ms(10*DELAY);
+		}
+
+		loops--;
+	}
+}
 
 /* Initialize timer1. On compare match the interrupt will be triggered to fill the Shift Register
  * with the contents of ledPins, and latch the signals to output.
@@ -200,7 +227,7 @@ void initTimer1(){
 ISR(TIMER1_COMPA_vect){
    SH_CP_low();
    ST_CP_low();
-   for (uint16_t i=0; i<16; i++)
+   for (uint16_t i=15; i<65535; i--)
    {
 	   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
 	   // If position i of ledPins contains a 1, set Data Serial to 1. Else set Data Serial to 0.
