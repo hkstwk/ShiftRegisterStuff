@@ -5,17 +5,14 @@
 #include "shift_register.h"
 #include "timer.h"
 #include "defines.h"
-
 #include "init.h"
+
+#include "kitt.h"
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
 volatile uint16_t ledPins;
 
 //Define functions
-//===============================================
-void knightRider1(unsigned char loops);
-void knightRider2(unsigned char loops);
-void knightRider3(unsigned char loops);
 void snake(unsigned char loops);
 void leftRotate(unsigned char loops, uint16_t bitPattern);
 void rightRotate(unsigned char loops, uint16_t bitPattern);
@@ -30,9 +27,9 @@ int main (void)
    {
 	   knightRider1(3);
 	   _delay_ms(DELAY_LOOP);
-	   leftRotate(138, 0b0000000111001010);
+	   leftRotate(74, 0b0000000111001010);
 	   _delay_ms(DELAY_LOOP);
-	   rightRotate(134, 0b0000000111001010);
+	   rightRotate(70, 0b0000000111001010);
 	   _delay_ms(DELAY_LOOP);
 	   snake(2);
 	   _delay_ms(DELAY_LOOP);
@@ -59,60 +56,6 @@ int main (void)
    }
 
    return 0;
-}
-
-void knightRider3(unsigned char loops){
-	if (loops == 0)
-		loops = 1;
-	while (loops > 0){
-		for (int i=15;i>=0;i--)
-		{
-		   ledPins |= (_BV(i));
-		   _delay_ms(DELAY);
-		}
-		for (int i=0;i<=15;i++)
-		{
-		   ledPins &= ~(_BV(i));
-		   _delay_ms(DELAY);
-		}
-		loops--;
-	}
-}
-
-void knightRider2(unsigned char loops){
-	if (loops == 0)
-		loops = 1;
-	while (loops > 0){
-		for (int i=15;i>=0;i--)
-		{
-		   ledPins = (_BV(i));
-		   _delay_ms(DELAY);
-		}
-		for (int i=0;i<=15;i++)
-		{
-		   ledPins = (_BV(i));
-		   _delay_ms(DELAY);
-		}
-		loops--;
-	}
-}
-
-void knightRider1(unsigned char loops){
-	if (loops == 0)
-		loops = 1;
-	while (loops > 0){
-		for (int i=15;i>=0;i--)
-		{
-		   ledPins = (_BV(i) ^ 0b1111111111111111);
-		   _delay_ms(DELAY);
-		}
-		for (int i=1;i<=15;i++)
-		{
-		   ledPins = (_BV(i) ^ 0b1111111111111111);
-		   _delay_ms(DELAY);
-		}
-		loops--;
-	}
 }
 
 void snake(unsigned char loops){
@@ -156,7 +99,7 @@ void leftRotate(unsigned char loops, uint16_t bitPattern){
 	ledPins = bitPattern;
 	while (loops > 0){
 		ledPins = ROL(ledPins, 1);
-		_delay_ms(7*DELAY);
+		_delay_ms(5*DELAY);
 		loops--;
 	}
 }
@@ -165,7 +108,7 @@ void rightRotate(unsigned char loops, uint16_t bitPattern){
 	ledPins = bitPattern;
 	while (loops > 0){
 		ledPins = ROR(ledPins, 1);
-		_delay_ms(7*DELAY);
+		_delay_ms(5*DELAY);
 		loops--;
 	}
 }
