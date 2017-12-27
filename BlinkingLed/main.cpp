@@ -8,20 +8,16 @@
 #include "init.h"
 
 #include "kitt.h"
+#include "animations/rotation.h"
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
 volatile uint16_t ledPins;
 
-//Define functions
-void snake(unsigned char loops);
-void leftRotate(unsigned char loops, uint16_t bitPattern);
-void rightRotate(unsigned char loops, uint16_t bitPattern);
-//===============================================
 
 int main (void)
 {
-   ioinit(); //Setup IO pins and defaults
-   initTimer1();
+   ioinit(); 		// Setup IO pins and defaults
+   initTimer1();		// Setup timer/counter1 with interrupt handler for latching output 74HC595
 
    while(1)
    {
@@ -83,32 +79,6 @@ void snake(unsigned char loops){
 		   ledPins &= ~(_BV(i));
 		   _delay_ms(DELAY);
 		}
-		loops--;
-	}
-}
-
-uint16_t ROL(uint16_t bitPattern, unsigned char digits){
-	return (bitPattern << digits) | bitPattern >> (INT_BITS - digits);
-}
-
-uint16_t ROR(uint16_t bitPattern, unsigned char digits){
-	return (bitPattern >> digits) | bitPattern << (INT_BITS - digits);
-}
-
-void leftRotate(unsigned char loops, uint16_t bitPattern){
-	ledPins = bitPattern;
-	while (loops > 0){
-		ledPins = ROL(ledPins, 1);
-		_delay_ms(5*DELAY);
-		loops--;
-	}
-}
-
-void rightRotate(unsigned char loops, uint16_t bitPattern){
-	ledPins = bitPattern;
-	while (loops > 0){
-		ledPins = ROR(ledPins, 1);
-		_delay_ms(5*DELAY);
 		loops--;
 	}
 }
