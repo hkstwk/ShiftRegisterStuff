@@ -16,6 +16,4 @@
 #define PRESCALER256		 (1 << CS12)
 #define PRESCALER1024	((1 << CS10) | (1 << CS12))
 
-
-
 #endif /* TIMER_H_ */

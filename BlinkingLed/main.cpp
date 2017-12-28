@@ -12,10 +12,19 @@
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
 volatile uint16_t ledPins;
-
+volatile uint16_t previousLedPins;
+volatile uint8_t currentLayer;
 
 int main (void)
 {
+    LAYER_DDR |= (1 << LAYER0) | (1 << LAYER1) | (1 << LAYER2) | (1 << LAYER3);
+
+    previousLedPins = 0xAB;
+
+    // initialize layer 0; other layers off.
+    currentLayer = 0;
+    LAYER_PORT = (1 << currentLayer);
+
    ioinit(); 		// Setup IO pins and defaults
    initTimer1();		// Setup timer/counter1 with interrupt handler for latching output 74HC595
 
@@ -38,9 +47,9 @@ int main (void)
 	   knightRider3(3);
 	   _delay_ms(DELAY_LOOP);
 	   knightRider2(3);
-	   _delay_ms(DELAY_LOOP);
+	   _delay_ms(5*DELAY_LOOP);
 	   ledPins = (0xffff);
-	   _delay_ms(DELAY_LOOP);
+	   _delay_ms(5*DELAY_LOOP);
 	   ledPins = (0x0000);
 	   _delay_ms(DELAY_LOOP);
 	   ledPins = (0xffff ^ 0b0101010101010101);

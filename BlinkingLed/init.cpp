@@ -4,9 +4,12 @@
 
 #include "shift_register.h"
 #include "timer.h"
+#include "defines.h"
 
 // 16-bits storage for anode side of the leds. I use a two byte unsigned integer type to do the job
 extern volatile uint16_t ledPins;
+extern volatile uint16_t previousLedPins;
+extern volatile uint8_t currentLayer;
 
 void ioinit (void)
 {
@@ -34,22 +37,38 @@ void initTimer1(){
  * See shift_register.h for definitions and low level functions used here.
  */
 ISR(TIMER1_COMPA_vect){
-   SH_CP_low();
-   ST_CP_low();
-   for (uint16_t i=15; i<65535; i--)
-   {
-	   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
-	   // If position i of ledPins contains a 1, set Data Serial to 1. Else set Data Serial to 0.
-	   if ((ledPins & (uint16_t)(1 << i)) == (uint16_t)(1 << i))
-		 DS_high();
-	  else
-		 DS_low();
+	// change output only if ledPins content has changed
+	if (ledPins != previousLedPins){
+		SH_CP_low();
+		ST_CP_low();
+		for (uint16_t i=15; i<65535; i--)
+		{
+		   // type cast to uint16_t needed for (1 << i) to prevent build from comparison warning/failure
+		   // If position i of ledPins contains a 1, set Data Serial to 1. Else set Data Serial to 0.
+		   if ((ledPins & (uint16_t)(1 << i)) == (uint16_t)(1 << i))
+			 DS_high();
+		  else
+			 DS_low();
 
-	   // clock the value of Data Serial into the shift register
-	  SH_CP_high();
-	  SH_CP_low();
-   }
+		   // clock the value of Data Serial into the shift register
+		  SH_CP_high();
+		  SH_CP_low();
+		}
 
-   // latch the shift registers to output. All 16 bits are handled in one cycle.
-   ST_CP_high();
+		// latch the shift registers to output. All 16 bits are handled in one cycle.
+		ST_CP_high();
+
+		// update previousLedPins
+		previousLedPins = ledPins;
+	}
+
+	// Rotate layer for POV (Persistence of Vision) effect
+	LAYER_PORT &= ~(1 << currentLayer); 	// 1) switch currentLayer off
+	if (currentLayer < (CUBE_SIZE-1)){ 	// 2) increment currentLayer or reset to 0
+		currentLayer++;
+	}
+	else{
+		currentLayer = 0;
+	}
+	LAYER_PORT |= (1 << currentLayer);	// 3) switch (new) currentLayer on
 }
